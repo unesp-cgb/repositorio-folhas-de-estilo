@@ -307,15 +307,25 @@
             </dcvalue>
         </xsl:for-each>
 
-        <!-- dc.identifier.orcid -->
-	<!--
+	<!-- dc.author.orcid -->
         <xsl:for-each select="static_data/contributors/contributor/name">
-            <dcvalue element="identifier" qualifier="orcid">
-                <xsl:value-of select="./@orcid_id" />
+	    <dcvalue element="author" qualifier="orcid">
+                <xsl:variable name="authorsORCID">
+		    <xsl:if test="./@orcid_id">
+		        <xsl:value-of select="./@orcid_id"/>   
+			<xsl:text>[</xsl:text>
+                        <xsl:value-of select="first_name"/>
+                        <xsl:text> </xsl:text>
+                        <xsl:value-of select="last_name"/>  
+                        <xsl:text>]</xsl:text>
+	            </xsl:if>
+                </xsl:variable>
+		      
+		<xsl:value-of select="$authorsORCID"/>
+		      
             </dcvalue>
-            
-        </xsl:for-each>
-        -->
+        </xsl:for-each>	    
+
         <!-- dc.contributor.institution -->
 
         <xsl:for-each select="static_data/fullrecord_metadata/addresses/address_name/address_spec">
