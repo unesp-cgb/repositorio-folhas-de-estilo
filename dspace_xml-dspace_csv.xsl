@@ -21,7 +21,7 @@
         
         <!-- Cabeçalho do arquivo CSV -->
         
-        <xsl:text>"id","collection","dc.contributor.advisor[]","dc.contributor.author[]","dc.contributor.institution[]","dc.date.issued[]","dc.description.abstract[]","dc.description.abstract[en]","dc.description.abstract[es]","dc.description.abstract[fr]","dc.description.abstract[pt]","dc.description.affiliation[]","dc.description.affiliationUnesp[]","dc.description.sponsorship[]","dc.description.sponsorshipId[]","dc.format.extent[]","dc.identifier[]","dc.identifier.aleph[]","dc.identifier.capes[]","dc.identifier.citation[]","dc.identifier.doi[]","dc.identifier.file[]","dc.identifier.isbn[]","dc.identifier.issn[]","dc.identifier.lattes[]","dc.identifier.scielo[]","dc.identifier.scopus[]","dc.identifier.wos[]","dc.language.iso[]","dc.publisher[]","dc.relation.ispartof[]","dc.rights.accessRights[]","dc.source[]","dc.subject[]","dc.subject[en]","dc.subject[pt]","dc.title[]","dc.title[en]","dc.title[es]","dc.title[fr]","dc.title[pt]","dc.title.alternative[]","dc.title.alternative[en]","dc.title.alternative[es]","dc.title.alternative[fr]","dc.title.alternative[pt]","dc.type[]","dcterms.license[]","dcterms.rightsHolder[]","unesp.campus[pt]","unesp.department[pt]","unesp.graduateProgram[pt]","unesp.knowledgeArea[pt]","unesp.researchArea[pt]","unesp.undergraduate[pt]"</xsl:text>
+        <xsl:text>"id","collection","dc.contributor.advisor[]","dc.contributor.author[]","dc.contributor.institution[]","dc.date.issued[]","dc.description.abstract[]","dc.description.abstract[en]","dc.description.abstract[es]","dc.description.abstract[fr]","dc.description.abstract[pt]","dc.description.affiliation[]","dc.description.affiliationUnesp[]","dc.description.sponsorship[]","dc.description.sponsorshipId[]","dc.format.extent[]","dc.identifier[]","dc.identifier.aleph[]","dc.identifier.capes[]","dc.identifier.citation[]","dc.identifier.doi[]","dc.identifier.file[]","dc.identifier.isbn[]","dc.identifier.issn[]","dc.identifier.lattes[]","dc.identifier.scielo[]","dc.identifier.scopus[]","dc.identifier.wos[]","dc.language.iso[]","dc.publisher[]","dc.relation.ispartof[]","dc.rights.accessRights[]","dc.source[]","dc.subject[]","dc.subject[en]","dc.subject[pt]","dc.title[]","dc.title[en]","dc.title[es]","dc.title[fr]","dc.title[pt]","dc.title.alternative[]","dc.title.alternative[en]","dc.title.alternative[es]","dc.title.alternative[fr]","dc.title.alternative[pt]","dc.type[]","dcterms.license[]","dcterms.rightsHolder[]","unesp.campus[pt]","unesp.department[pt]","unesp.graduateProgram[pt]","unesp.knowledgeArea[pt]","unesp.researchArea[pt]","unesp.undergraduate[pt]","unesp.author.orcid[]"</xsl:text>
         <xsl:text>&#xa;</xsl:text>
         
         <xsl:for-each select="records/dublin_core">
@@ -378,6 +378,12 @@
     	<xsl:text>,&quot;</xsl:text>
     	<xsl:value-of select="dcvalue[@element='undergraduate']" />
     	<xsl:text>&quot;</xsl:text>
+        
+        <!-- unesp.author.orcid -->
+        
+        <xsl:text>,&quot;</xsl:text>
+        <xsl:value-of select="replace(string-join(distinct-values(dcvalue[@element='author' and @qualifier='orcid']),'||'),'&quot;','')" />
+        <xsl:text>&quot;</xsl:text>
         
         <!-- Adiciona uma quebra de linha -->
 
