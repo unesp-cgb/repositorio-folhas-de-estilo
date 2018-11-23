@@ -63,9 +63,9 @@
     <xsl:template match="/">
         <records>
         	
-        	<!-- O "caminho" abaixo deve ser atualizado toda vez:
-        	Para o primeiro arquivo, o caminho deve ser: /soap:Envelope/soap:Body/ns2:searchResponse/return/records/records/REC
-        	Para os demais arquivos, o caminho deve ser: /soap:Envelope/soap:Body/ns2:retrieveResponse/return/records/records/REC -->
+        	<!-- O "caminho" abaixo deve ser atualizado 
+        	Para testar com um registro usar /REC
+        	Para rodar com todos os registros usar /articles/REC -->
         	
         	<xsl:for-each select="/REC">
                 <dublin_core schema="dc">
