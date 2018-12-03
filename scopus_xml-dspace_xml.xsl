@@ -7,6 +7,7 @@
     xmlns:ait="http://www.elsevier.com/xml/ani/ait" 
     xmlns:cto="http://www.elsevier.com/xml/cto/dtd"
     xmlns:functx="http://www.functx.com"
+    xmlns:dn="http://www.elsevier.com/xml/svapi/abstract/dtd"
     exclude-result-prefixes="#all"
     version="2.0">
     
@@ -22,9 +23,11 @@
     
     <xsl:template match="/">
         <records>
-            <xsl:for-each select="/abstracts-retrieval-response/item/bibrecord">
+            <!-- <xsl:text>Teste 2</xsl:text> -->
+            <xsl:for-each select="/dn:abstracts-retrieval-response/item/bibrecord">
                 <dublin_core schema="dc">
-                    <xsl:call-template name="record" />
+                   <xsl:call-template name="record" /> 
+                   <!-- <xsl:text>Teste</xsl:text> -->
                 </dublin_core>
             </xsl:for-each>
         </records>
