@@ -68,23 +68,25 @@
         
         <!-- dc.contributor.author -->
         
-        <xsl:for-each select="head/author-group/author">
+        <xsl:for-each select="/dn:abstracts-retrieval-response/dn:authors/dn:author">
             <dcvalue element="contributor" qualifier="author">
-                <xsl:variable name="auth-id" select="./cto:auth-id" />
-                <xsl:choose>
-                    <xsl:when test="ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
-                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />
+                
+                <xsl:variable name="auth-id" select="@auid" />
+
+                <xsl:choose>  <!-- Por que não precisa do dn: na frente de todo mundo aqui? -->
+                    <xsl:when test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and /dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
+                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />
                         <xsl:text>, </xsl:text>
-                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
+                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />
+                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />
                         <xsl:text>, </xsl:text>
-                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />
+                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />
                     </xsl:otherwise>
                 </xsl:choose>
                 
-                <xsl:if test="functx:contains-any-of(lower-case(string-join(ancestor::node()[2]/xocs:item/item/bibrecord/head/author-group[author[@auid = $auth-id]]/affiliation/organization,' ')),
+                <xsl:if test="functx:contains-any-of(lower-case(string-join(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group[author[@auid = $auth-id]]/affiliation/organization,' ')),
                     ('unesp',
                     'univ estadual paulista',
                     'universidade estadual paulista',
