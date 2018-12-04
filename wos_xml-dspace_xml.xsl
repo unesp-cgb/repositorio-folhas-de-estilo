@@ -67,7 +67,7 @@
         	Para testar com um registro usar /REC
         	Para rodar com todos os registros usar /articles/REC -->
         	
-        	<xsl:for-each select="/REC">
+        	<xsl:for-each select="/articles/REC">
                 <dublin_core schema="dc">
                     <xsl:call-template name="record" />
                 </dublin_core>
@@ -309,21 +309,23 @@
 
 	<!-- dc.author.orcid -->
         <xsl:for-each select="static_data/contributors/contributor/name">
-	    <dcvalue element="author" qualifier="orcid">
                 <xsl:variable name="authorsORCID">
-		    <xsl:if test="./@orcid_id">
-		        <xsl:value-of select="./@orcid_id"/>   
-			<xsl:text>[</xsl:text>
-                        <xsl:value-of select="first_name"/>
-                        <xsl:text> </xsl:text>
-                        <xsl:value-of select="last_name"/>  
-                        <xsl:text>]</xsl:text>
-	            </xsl:if>
+		             <xsl:if test="./@orcid_id">
+		                 <xsl:value-of select="./@orcid_id"/>   
+		                     <xsl:text>[</xsl:text>
+                             <xsl:value-of select="first_name"/>
+                             <xsl:text> </xsl:text>
+                             <xsl:value-of select="last_name"/>  
+                             <xsl:text>]</xsl:text>
+	                 </xsl:if>
                 </xsl:variable>
-		      
-		<xsl:value-of select="$authorsORCID"/>
-		      
-            </dcvalue>
+		      	      
+            <xsl:if test="$authorsORCID != ''">
+                <dcvalue element="author" qualifier="orcid">
+                    <xsl:value-of select="$authorsORCID"/>
+                </dcvalue>
+            </xsl:if>
+            
         </xsl:for-each>	    
 
         <!-- dc.contributor.institution -->
