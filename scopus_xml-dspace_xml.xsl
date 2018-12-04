@@ -115,6 +115,39 @@
             </dcvalue>
         </xsl:for-each>
         
+        <!-- dc.author.orcid -->
+        
+        <xsl:for-each select="/dn:abstracts-retrieval-response/dn:authors/dn:author">
+            
+                <xsl:variable name="auth-id" select="@auid" />
+               
+                <xsl:variable name="authorsORCID">
+                <xsl:if test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id and @orcid]">
+                    <xsl:value-of select="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/@orcid"/><xsl:text>[</xsl:text>
+                        <xsl:choose>  <!-- Por que não precisa do dn: na frente de todo mundo aqui? -->
+                          <xsl:when test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and /dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
+                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
+                             <xsl:text> </xsl:text>
+                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />                        
+                          </xsl:when>
+                          <xsl:otherwise>
+                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />                        
+                             <xsl:text> </xsl:text>
+                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />                        
+                          </xsl:otherwise>
+                        </xsl:choose>
+                    <xsl:text>]</xsl:text>
+                </xsl:if>
+                </xsl:variable>
+                
+                <xsl:if test="$authorsORCID != ''">
+                   <dcvalue element="author" qualifier="orcid">
+                   <xsl:value-of select="$authorsORCID"/>
+                   </dcvalue>
+                </xsl:if>
+            
+        </xsl:for-each>
+        
         <!-- dc.contributor.institution -->
         
         <xsl:for-each select="head/author-group/affiliation">
