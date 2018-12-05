@@ -21,6 +21,15 @@
         <xsl:sequence select="some $searchString in $searchStrings satisfies contains($arg,$searchString)"/>
     </xsl:function>
     
+    <!-- Sobre ancestor::node
+        
+        O nó que usamos como raiz é /dn:abstracts-retrieval-response/item/bibrecord
+        
+        ancestor::node()[1] é /dn:abstracts-retrieval-response/item
+        ancestor::node()[2] é /dn:abstracts-retrieval-response
+        
+        Os nomes dos ancestrais podem ser obtidos com ancestor::*/name() -->        
+    
     <xsl:template match="/">
         <records>
             <!-- <xsl:text>Teste 2</xsl:text> -->
@@ -827,9 +836,9 @@
         </xsl:for-each>
         
         <!-- dc.identifier.scopus -->
-        
-        <dcvalue element="identifier" qualifier="scopus" >
-            <xsl:value-of select="/dn:abstracts-retrieval-response/dn:coredata/dn:eid" />
+              
+        <dcvalue element="identifier" qualifier="scopus" > 
+            <xsl:value-of select="ancestor::node()[2]/dn:coredata/dn:eid" />
         </dcvalue>
         
         <!-- dc.language.iso -->
