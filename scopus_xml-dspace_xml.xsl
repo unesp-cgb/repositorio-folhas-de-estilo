@@ -829,7 +829,7 @@
         <!-- dc.identifier.scopus -->
         
         <dcvalue element="identifier" qualifier="scopus" >
-            <xsl:value-of select="ancestor::node()[3]/xocs:meta/xocs:eid" />
+            <xsl:value-of select="/dn:abstracts-retrieval-response/dn:coredata/dn:eid" />
         </dcvalue>
         
         <!-- dc.language.iso -->
