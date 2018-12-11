@@ -13,12 +13,42 @@
     
     <xsl:output indent="yes" encoding="UTF-8" />
     
+    <xsl:variable name="lang_from" select="('eng','por','fre','spa','ita','deu')"/>    
+    <xsl:variable name="lang_to" select="('en','pt','fr','es','it','de')"/>    
+    
     <!-- Funções -->
     
     <xsl:function name="functx:contains-any-of" as="xs:boolean">
         <xsl:param name="arg" as="xs:string?"/> 
         <xsl:param name="searchStrings" as="xs:string*"/> 
         <xsl:sequence select="some $searchString in $searchStrings satisfies contains($arg,$searchString)"/>
+    </xsl:function>
+    
+    <xsl:function name="functx:if-absent" as="item()*" 
+        xmlns:functx="http://www.functx.com" >
+        <xsl:param name="arg" as="item()*"/> 
+        <xsl:param name="value" as="item()*"/> 
+        <xsl:sequence select=" 
+            if (exists($arg))
+            then $arg
+            else $value
+            "/>
+    </xsl:function>
+    
+    <xsl:function name="functx:replace-multi" as="xs:string?" 
+        xmlns:functx="http://www.functx.com" >
+        <xsl:param name="arg" as="xs:string?"/> 
+        <xsl:param name="changeFrom" as="xs:string*"/> 
+        <xsl:param name="changeTo" as="xs:string*"/> 
+        <xsl:sequence select=" 
+            if (count($changeFrom) > 0)
+            then functx:replace-multi(
+            replace($arg, $changeFrom[1],
+            functx:if-absent($changeTo[1],'')),
+            $changeFrom[position() > 1],
+            $changeTo[position() > 1])
+            else $arg
+            "/>
     </xsl:function>
     
     <!-- Sobre ancestor::node
@@ -33,7 +63,7 @@
     <xsl:template match="/">
         <records>
             <!-- <xsl:text>Teste 2</xsl:text> -->
-            <xsl:for-each select="/dn:abstracts-retrieval-response/item/bibrecord">
+            <xsl:for-each select="/articles/dn:abstracts-retrieval-response/item/bibrecord">
                 <dublin_core schema="dc">
                    <xsl:call-template name="record" /> 
                    <!-- <xsl:text>Teste</xsl:text> -->
@@ -77,25 +107,25 @@
         
         <!-- dc.contributor.author -->
         
-        <xsl:for-each select="/dn:abstracts-retrieval-response/dn:authors/dn:author">
+        <xsl:for-each select="ancestor::node()[2]/dn:authors/dn:author">
             <dcvalue element="contributor" qualifier="author">
                 
                 <xsl:variable name="auth-id" select="@auid" />
 
                 <xsl:choose>  <!-- Por que não precisa do dn: na frente de todo mundo aqui? -->
-                    <xsl:when test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and /dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
-                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />
+                    <xsl:when test="ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
+                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />
                         <xsl:text>, </xsl:text>
-                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
+                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />
+                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />
                         <xsl:text>, </xsl:text>
-                        <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />
+                        <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />
                     </xsl:otherwise>
                 </xsl:choose>
                 
-                <xsl:if test="functx:contains-any-of(lower-case(string-join(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group[author[@auid = $auth-id]]/affiliation/organization,' ')),
+                <xsl:if test="functx:contains-any-of(lower-case(string-join(ancestor::node()[2]/item/bibrecord/head/author-group[author[@auid = $auth-id]]/affiliation/organization,' ')),
                     ('unesp',
                     'univ estadual paulista',
                     'universidade estadual paulista',
@@ -126,23 +156,23 @@
         
         <!-- dc.author.orcid -->
         
-        <xsl:for-each select="/dn:abstracts-retrieval-response/dn:authors/dn:author">
+        <xsl:for-each select="ancestor::node()[2]/dn:authors/dn:author">
             
                 <xsl:variable name="auth-id" select="@auid" />
                
                 <xsl:variable name="authorsORCID">
-                <xsl:if test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id and @orcid]">
-                    <xsl:value-of select="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/@orcid"/><xsl:text>[</xsl:text>
+                    <xsl:if test="ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id and @orcid]">
+                        <xsl:value-of select="ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/@orcid"/><xsl:text>[</xsl:text>
                         <xsl:choose>  <!-- Por que não precisa do dn: na frente de todo mundo aqui? -->
-                          <xsl:when test="/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and /dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
-                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
+                            <xsl:when test="ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname and ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name">
+                                <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:given-name))" />
                              <xsl:text> </xsl:text>
-                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />                        
+                                <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/ce:surname))" />                        
                           </xsl:when>
                           <xsl:otherwise>
-                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />                        
+                              <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:given-name))" />                        
                              <xsl:text> </xsl:text>
-                             <xsl:value-of select="normalize-space(distinct-values(/dn:abstracts-retrieval-response/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />                        
+                              <xsl:value-of select="normalize-space(distinct-values(ancestor::node()[2]/item/bibrecord/head/author-group/author[@auid = $auth-id]/preferred-name/ce:surname))" />                        
                           </xsl:otherwise>
                         </xsl:choose>
                     <xsl:text>]</xsl:text>
@@ -516,7 +546,7 @@
         <xsl:for-each select="head/abstracts/abstract">
             <dcvalue element="description" qualifier="abstract">
                 <xsl:attribute name="language">
-                    <xsl:value-of select="./@xml:lang" />
+                    <xsl:value-of select="./functx:replace-multi(./@xml:lang,$lang_from, $lang_to)" />
                 </xsl:attribute>
                 <xsl:value-of select="normalize-space(string-join(./ce:para,' '))"/>
             </dcvalue>
@@ -843,7 +873,7 @@
         
         <!-- dc.language.iso -->
         
-        <xsl:for-each select="head/citation-info/citation-language/@xml:lang">
+        <xsl:for-each select="head/citation-info/citation-language/functx:replace-multi(./@xml:lang,$lang_from, $lang_to)">
             <dcvalue element="language" qualifier="iso" >
                 <xsl:value-of select="."/>
             </dcvalue>
@@ -883,7 +913,7 @@
                     
                     <xsl:when test="./@original = 'y'">
                         <xsl:if test="./@xml:lang">
-                            <xsl:attribute name="language" select="./@xml:lang" />
+                            <xsl:attribute name="language" select="functx:replace-multi(./@xml:lang,$lang_from, $lang_to)" />
                         </xsl:if>
                         <xsl:value-of select="normalize-space(.)" />
                     </xsl:when>
@@ -891,14 +921,14 @@
                     <xsl:when test="./@original = 'n'">
                         <xsl:attribute name="qualifier">alternative</xsl:attribute>
                         <xsl:if test="./@xml:lang">
-                            <xsl:attribute name="language" select="./@xml:lang" />
+                            <xsl:attribute name="language" select="functx:replace-multi(./@xml:lang,$lang_from, $lang_to)" />
                         </xsl:if>
                         <xsl:value-of select="normalize-space(.)" />
                     </xsl:when>
                     
                     <xsl:otherwise>
                         <xsl:if test="./@xml:lang">
-                            <xsl:attribute name="language" select="./@xml:lang" />
+                            <xsl:attribute name="language" select="functx:replace-multi(./@xml:lang,$lang_from, $lang_to)" />
                         </xsl:if>
                         <xsl:value-of select="normalize-space(.)" />
                     </xsl:otherwise>
