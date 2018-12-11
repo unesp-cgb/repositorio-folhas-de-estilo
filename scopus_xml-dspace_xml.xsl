@@ -556,18 +556,36 @@
         
         <xsl:for-each select="head/author-group/affiliation">
             <dcvalue element="description" qualifier="affiliation">
+               
+                <xsl:choose>
+               
+                <xsl:when test="./organization">
+               
+                   <xsl:value-of select="normalize-space(string-join(./organization,' '))" />
                 
-                <xsl:value-of select="normalize-space(string-join(./organization,' '))" />
+                   <xsl:if test="./address-part">
+                       <xsl:text>, </xsl:text>
+                       <xsl:value-of select="normalize-space(string-join(./address-part,' '))" />
+                   </xsl:if>
                 
-                <xsl:if test="./address-part">
-                    <xsl:text>, </xsl:text>
-                    <xsl:value-of select="normalize-space(string-join(./address-part,' '))" />
-                </xsl:if>
+                   <xsl:if test="./city-group">
+                       <xsl:text>, </xsl:text>
+                       <xsl:value-of select="normalize-space(string-join(./city-group,' '))" />
+                   </xsl:if>
+                    
+                </xsl:when>
+                <xsl:otherwise>
+                    
+                    <xsl:if test="./ce:text">
+                       
+                        <xsl:value-of select="normalize-space(string-join(./ce:text,' '))" />
+                       
+                    </xsl:if>
+                    
+                </xsl:otherwise>    
+                 
                 
-                <xsl:if test="./city-group">
-                    <xsl:text>, </xsl:text>
-                    <xsl:value-of select="normalize-space(string-join(./city-group,' '))" />
-                </xsl:if>
+                </xsl:choose>
                 
             </dcvalue>
         </xsl:for-each>
