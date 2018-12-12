@@ -964,17 +964,17 @@
                 <xsl:when test="head/citation-info/citation-type/@code = 'bk'">Livro</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'bz'">Business Article</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'ch'">Capítulo de livro</xsl:when>
-                <xsl:when test="head/citation-info/citation-type/@code = 'cp'">Conference Paper</xsl:when>
+                <xsl:when test="head/citation-info/citation-type/@code = 'cp'">Trabalho apresentado em evento</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'cr'">Conference Review</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'ed'">Editorial</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'er'">Errata</xsl:when>
-                <xsl:when test="head/citation-info/citation-type/@code = 'ip'">Article in Press</xsl:when>
+                <xsl:when test="head/citation-info/citation-type/@code = 'ip'">Artigo</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'le'">Carta</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'no'">Nota</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'pr'">Press Release</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 're'">Resenha</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'rp'">Relatório</xsl:when>
-                <xsl:when test="head/citation-info/citation-type/@code = 'sh'">Short Survey</xsl:when>
+                <xsl:when test="head/citation-info/citation-type/@code = 'sh'">Artigo</xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="head/citation-info/citation-type/@code" />
                 </xsl:otherwise>
