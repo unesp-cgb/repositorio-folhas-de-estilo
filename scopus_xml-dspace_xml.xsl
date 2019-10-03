@@ -891,7 +891,7 @@
         
         <!-- dc.language.iso -->
         
-        <xsl:for-each select="head/citation-info/citation-language/functx:replace-multi(./@xml:lang,$lang_from, $lang_to)">
+        <xsl:for-each select="head/citation-info/citation-language/@xml:lang">
             <dcvalue element="language" qualifier="iso" >
                 <xsl:value-of select="."/>
             </dcvalue>
