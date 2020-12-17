@@ -975,6 +975,7 @@
                 <xsl:when test="head/citation-info/citation-type/@code = 're'">Resenha</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'rp'">Relatório</xsl:when>
                 <xsl:when test="head/citation-info/citation-type/@code = 'sh'">Artigo</xsl:when>
+                <xsl:when test="head/citation-info/citation-type/@code = 'dp'">Data paper</xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="head/citation-info/citation-type/@code" />
                 </xsl:otherwise>
