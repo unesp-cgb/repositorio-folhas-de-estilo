@@ -14,6 +14,7 @@
     Última atualização: 2015-03-19
 	Última atualização: 2018-08-01 - Atualizado somente campo de Orientador
 	Última atualização: 2018-08-21 - Atualizado somente undergraduatedID segundo portaria 2016
+	Última atualização: 2020-12-03 - Removido o prefixo marc que o Alma não usa mais e alterado o dc:source
     -->
     
     <!-- Importa as regras da folha de estilo MARC21slimUtils.xsl (disponível para download em: http://www.loc.gov/standards/marcxml//xslt/MARC21slimUtils.xsl)
@@ -61,11 +62,11 @@
 
     <!-- Template -->
     
-    <!-- Para cada marc:collection/marc:record será chamado o template record -->
+    <!-- Para cada collection/record será chamado o template record -->
     
     <xsl:template match="/">
         <records>
-            <xsl:for-each select="marc:collection/marc:record">
+            <xsl:for-each select="collection/record">
                 <dublin_core schema="dc">
                     <xsl:call-template name="record" />
                 </dublin_core>
@@ -84,23 +85,23 @@
         <dcvalue element="title">
             
             <xsl:choose>
-                <xsl:when test="substring(marc:controlfield[@tag='008'],36,3)='por'"><xsl:attribute name="language">pt</xsl:attribute></xsl:when>
-                <xsl:when test="substring(marc:controlfield[@tag='008'],36,3)='eng'"><xsl:attribute name="language">en</xsl:attribute></xsl:when>
-                <xsl:when test="substring(marc:controlfield[@tag='008'],36,3)='spa'"><xsl:attribute name="language">es</xsl:attribute></xsl:when>
-                <xsl:when test="substring(marc:controlfield[@tag='008'],36,3)='fre'"><xsl:attribute name="language">fr</xsl:attribute></xsl:when>
+                <xsl:when test="substring(controlfield[@tag='008'],36,3)='por'"><xsl:attribute name="language">pt</xsl:attribute></xsl:when>
+                <xsl:when test="substring(controlfield[@tag='008'],36,3)='eng'"><xsl:attribute name="language">en</xsl:attribute></xsl:when>
+                <xsl:when test="substring(controlfield[@tag='008'],36,3)='spa'"><xsl:attribute name="language">es</xsl:attribute></xsl:when>
+                <xsl:when test="substring(controlfield[@tag='008'],36,3)='fre'"><xsl:attribute name="language">fr</xsl:attribute></xsl:when>
             </xsl:choose>
 
-            <xsl:for-each select="marc:datafield[@tag=245]">
+            <xsl:for-each select="datafield[@tag=245]">
                 <xsl:call-template name="chopPunctuation">
                     <xsl:with-param name="chopString">
-                        <xsl:value-of select="marc:subfield[@code='a']"/>
+                        <xsl:value-of select="subfield[@code='a']"/>
                     </xsl:with-param>
                 </xsl:call-template>
-                <xsl:if test="marc:subfield[@code='b']">
+                <xsl:if test="subfield[@code='b']">
                     <xsl:text>: </xsl:text>
                     <xsl:call-template name="chopPunctuation">
                         <xsl:with-param name="chopString">
-                            <xsl:value-of select="marc:subfield[@code='b']"/>
+                            <xsl:value-of select="subfield[@code='b']"/>
                         </xsl:with-param>
                     </xsl:call-template>
                 </xsl:if>
@@ -109,29 +110,29 @@
         
         <!-- dc.title.alternative - MARC 242ab -->
         
-        <xsl:if test="marc:datafield[@tag=242]">
+        <xsl:if test="datafield[@tag=242]">
             <dcvalue element="title" qualifier="alternative">
                 
                 <xsl:attribute name="language">
                     <xsl:choose>
-                        <xsl:when test="marc:datafield[@tag=242][1]/marc:subfield[@code='y']='por'">pt</xsl:when>
-                        <xsl:when test="marc:datafield[@tag=242][1]/marc:subfield[@code='y']='eng'">en</xsl:when>
-                        <xsl:when test="marc:datafield[@tag=242][1]/marc:subfield[@code='y']='spa'">es</xsl:when>
-                        <xsl:when test="marc:datafield[@tag=242][1]/marc:subfield[@code='y']='fre'">fr</xsl:when>
+                        <xsl:when test="datafield[@tag=242][1]/subfield[@code='y']='por'">pt</xsl:when>
+                        <xsl:when test="datafield[@tag=242][1]/subfield[@code='y']='eng'">en</xsl:when>
+                        <xsl:when test="datafield[@tag=242][1]/subfield[@code='y']='spa'">es</xsl:when>
+                        <xsl:when test="datafield[@tag=242][1]/subfield[@code='y']='fre'">fr</xsl:when>
                     </xsl:choose>
                 </xsl:attribute>
                 
                 <xsl:call-template name="chopPunctuation">
                     <xsl:with-param name="chopString">
-                        <xsl:value-of select="marc:datafield[@tag=242][1]/marc:subfield[@code='a']"/>
+                        <xsl:value-of select="datafield[@tag=242][1]/subfield[@code='a']"/>
                     </xsl:with-param>
                 </xsl:call-template>
                 
-                <xsl:if test="marc:datafield[@tag=242][1]/marc:subfield[@code='b']">
+                <xsl:if test="datafield[@tag=242][1]/subfield[@code='b']">
                     <xsl:text>: </xsl:text>
                     <xsl:call-template name="chopPunctuation">
                         <xsl:with-param name="chopString">
-                            <xsl:value-of select="marc:datafield[@tag=242][1]/marc:subfield[@code='b']"/>
+                            <xsl:value-of select="datafield[@tag=242][1]/subfield[@code='b']"/>
                         </xsl:with-param>
                     </xsl:call-template>
                 </xsl:if>
@@ -142,7 +143,7 @@
         <!-- dc.contributor.author - MARC 100a -->
             
         <dcvalue element="contributor" qualifier="author">
-            <xsl:for-each select="marc:datafield[@tag=100]">
+            <xsl:for-each select="datafield[@tag=100]">
                 <xsl:call-template name="chopPunctuation">
                     <xsl:with-param name="chopString">
                         <xsl:call-template name="subfieldSelect">
@@ -156,7 +157,7 @@
         
         <!-- dc.contributor.advisor - MARC 500a -->
         
-        <xsl:for-each select="marc:datafield[@tag=500]/marc:subfield[@code='a']">
+        <xsl:for-each select="datafield[@tag=500]/subfield[@code='a']">
         	<xsl:if test="contains(.,'rientador')">
         		<dcvalue element="contributor" qualifier="advisor">
 		        	<xsl:variable name="advisor">
@@ -258,17 +259,17 @@
         
         <dcvalue element="date" qualifier="issued">
             <xsl:choose>
-                <xsl:when test="ends-with(marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1],'/00/00')">
-                    <xsl:value-of select="substring(marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1],1,4)"/>
+                <xsl:when test="ends-with(datafield[@tag=943][1]/subfield[@code='a'][1],'/00/00')">
+                    <xsl:value-of select="substring(datafield[@tag=943][1]/subfield[@code='a'][1],1,4)"/>
                 </xsl:when>
-                <xsl:when test="ends-with(marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1],'/00')">
-                    <xsl:value-of select="replace(substring(marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1],1,7),'/','-')"/>
+                <xsl:when test="ends-with(datafield[@tag=943][1]/subfield[@code='a'][1],'/00')">
+                    <xsl:value-of select="replace(substring(datafield[@tag=943][1]/subfield[@code='a'][1],1,7),'/','-')"/>
                 </xsl:when>
-                <xsl:when test="marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1]">
-                    <xsl:value-of select="replace(marc:datafield[@tag=943][1]/marc:subfield[@code='a'][1],'/','-')"/>
+                <xsl:when test="datafield[@tag=943][1]/subfield[@code='a'][1]">
+                    <xsl:value-of select="replace(datafield[@tag=943][1]/subfield[@code='a'][1],'/','-')"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:value-of select="marc:datafield[@tag=260][1]/marc:subfield[@code='c']"/>
+                    <xsl:value-of select="datafield[@tag=260][1]/subfield[@code='c']"/>
                 </xsl:otherwise>
             </xsl:choose>
         </dcvalue>
@@ -279,106 +280,106 @@
         
         <!-- dc.description.abstract - MARC 520 -->
               
-        <xsl:for-each select="marc:datafield[@tag='520']">
+        <xsl:for-each select="datafield[@tag='520']">
         	 
         	<dcvalue element="description" qualifier="abstract">
                	<xsl:choose>
                     
-                    <xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resumo:')">
+                    <xsl:when test="starts-with(subfield[@code='a'][1],'Resumo:')">
                         <xsl:attribute name="language">pt</xsl:attribute>
-                        <xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resumo: ')" />
+                        <xsl:value-of select="substring-after(subfield[@code='a'][1],'Resumo: ')" />
                     </xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'RESUMO:')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'RESUMO:')">
                 		<xsl:attribute name="language">pt</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'RESUMO: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'RESUMO: ')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resumo :')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Resumo :')">
                 		<xsl:attribute name="language">pt</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resumo : ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Resumo : ')" />
                 	</xsl:when>
-                    <xsl:when test="starts-with(marc:subfield[@code='l'][1],'por')">
+                    <xsl:when test="starts-with(subfield[@code='l'][1],'por')">
                         <xsl:attribute name="language">pt</xsl:attribute>
-                        <xsl:value-of select="marc:subfield[@code='a'][1]" />        
+                        <xsl:value-of select="subfield[@code='a'][1]" />        
                     </xsl:when>
                     
-                    <xsl:when test="starts-with(marc:subfield[@code='a'][1],'Abstract: ')">
+                    <xsl:when test="starts-with(subfield[@code='a'][1],'Abstract: ')">
                         <xsl:attribute name="language">en</xsl:attribute>
-                        <xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Abstract: ')" />
+                        <xsl:value-of select="substring-after(subfield[@code='a'][1],'Abstract: ')" />
                     </xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'ABSTRACT: ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'ABSTRACT: ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'ABSTRACT: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'ABSTRACT: ')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Abstract:')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Abstract:')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Abstract:')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Abstract:')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Abstract :')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Abstract :')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Abstract : ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Abstract : ')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Abstracts: ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Abstracts: ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Abstracts: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Abstracts: ')" />
                 	</xsl:when>
-                    <xsl:when test="starts-with(marc:subfield[@code='l'][1],'eng')">
+                    <xsl:when test="starts-with(subfield[@code='l'][1],'eng')">
                         <xsl:attribute name="language">en</xsl:attribute>
-                        <xsl:value-of select="marc:subfield[@code='a'][1]" />        
+                        <xsl:value-of select="subfield[@code='a'][1]" />        
                     </xsl:when>
                     
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'The ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'The ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="marc:subfield[@code='a'][1]" />
+                		<xsl:value-of select="subfield[@code='a'][1]" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'This ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'This ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="marc:subfield[@code='a'][1]" />
+                		<xsl:value-of select="subfield[@code='a'][1]" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'With ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'With ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="marc:subfield[@code='a'][1]" />
+                		<xsl:value-of select="subfield[@code='a'][1]" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'We ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'We ')">
                 		<xsl:attribute name="language">en</xsl:attribute>
-                		<xsl:value-of select="marc:subfield[@code='a'][1]" />
+                		<xsl:value-of select="subfield[@code='a'][1]" />
                 	</xsl:when>
                 	
-                    <xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resume: ')">
+                    <xsl:when test="starts-with(subfield[@code='a'][1],'Resume: ')">
                         <xsl:attribute name="language">fr</xsl:attribute>
-                        <xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resume: ')" />
+                        <xsl:value-of select="substring-after(subfield[@code='a'][1],'Resume: ')" />
                     </xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resume : ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Resume : ')">
                 		<xsl:attribute name="language">fr</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resume : ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Resume : ')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resumé: ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Resumé: ')">
                 		<xsl:attribute name="language">fr</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resumé: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Resumé: ')" />
                 	</xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Résumé: ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Résumé: ')">
                 		<xsl:attribute name="language">fr</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Résumé: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Résumé: ')" />
                 	</xsl:when>
-                    <xsl:when test="starts-with(marc:subfield[@code='l'][1],'fre')">
+                    <xsl:when test="starts-with(subfield[@code='l'][1],'fre')">
                         <xsl:attribute name="language">fr</xsl:attribute>
-                        <xsl:value-of select="marc:subfield[@code='a'][1]" />        
+                        <xsl:value-of select="subfield[@code='a'][1]" />        
                     </xsl:when>
                     
-                    <xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resumen: ')">
+                    <xsl:when test="starts-with(subfield[@code='a'][1],'Resumen: ')">
                         <xsl:attribute name="language">es</xsl:attribute>
-                        <xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resumen: ')" />
+                        <xsl:value-of select="substring-after(subfield[@code='a'][1],'Resumen: ')" />
                     </xsl:when>
-                	<xsl:when test="starts-with(marc:subfield[@code='a'][1],'Resumén: ')">
+                	<xsl:when test="starts-with(subfield[@code='a'][1],'Resumén: ')">
                 		<xsl:attribute name="language">es</xsl:attribute>
-                		<xsl:value-of select="substring-after(marc:subfield[@code='a'][1],'Resumén: ')" />
+                		<xsl:value-of select="substring-after(subfield[@code='a'][1],'Resumén: ')" />
                 	</xsl:when>
-                    <xsl:when test="starts-with(marc:subfield[@code='l'][1],'spa')">
+                    <xsl:when test="starts-with(subfield[@code='l'][1],'spa')">
                         <xsl:attribute name="language">es</xsl:attribute>
-                        <xsl:value-of select="marc:subfield[@code='a'][1]" />        
+                        <xsl:value-of select="subfield[@code='a'][1]" />        
                     </xsl:when>
                     
                     <xsl:otherwise>
-                    	<xsl:value-of select="marc:subfield[@code='a'][1]" />
+                    	<xsl:value-of select="subfield[@code='a'][1]" />
                     </xsl:otherwise>
 
                 </xsl:choose>
@@ -387,12 +388,12 @@
             
         <!-- dc.format.extent - MARC 300abc -->
         
-        <xsl:for-each select="marc:datafield[@tag=300]">
-        	<xsl:if test="not(starts-with(marc:subfield[@code='a'],'1 CD-ROM'))">
+        <xsl:for-each select="datafield[@tag=300]">
+        	<xsl:if test="not(starts-with(subfield[@code='a'],'1 CD-ROM'))">
 	        	<dcvalue element="format" qualifier="extent">
 	        		<xsl:call-template name="chopPunctuation">
 	        			<xsl:with-param name="chopString">
-	        				<xsl:value-of select="marc:subfield[@code='a']"/>
+	        				<xsl:value-of select="subfield[@code='a']"/>
 	        			</xsl:with-param>
 	        			<xsl:with-param name="punctuation">:</xsl:with-param>
 	        		</xsl:call-template>
@@ -404,9 +405,9 @@
             
         <dcvalue element="language" qualifier="iso">
             <xsl:choose>
-            	<xsl:when test="substring(marc:controlfield[@tag='008'],36,3) = 'mul'">por</xsl:when>
+            	<xsl:when test="substring(controlfield[@tag='008'],36,3) = 'mul'">por</xsl:when>
             	<xsl:otherwise>
-            		<xsl:value-of select="substring(marc:controlfield[@tag='008'],36,3)"/>
+            		<xsl:value-of select="substring(controlfield[@tag='008'],36,3)"/>
             	</xsl:otherwise>
             </xsl:choose>
         </dcvalue>
@@ -417,7 +418,7 @@
             
         <!-- dc.subject - MARC 6XX, exceto 695, 696 e 697 -->
             
-        <xsl:for-each select="marc:datafield[starts-with(@tag,'6') 
+        <xsl:for-each select="datafield[starts-with(@tag,'6') 
             and not(@tag='692') 
             and not(@tag='695') 
             and not(@tag='696') 
@@ -433,7 +434,7 @@
             </dcvalue>
         </xsl:for-each> 
             
-        <xsl:for-each select="marc:datafield[@tag='692']">
+        <xsl:for-each select="datafield[@tag='692']">
             <dcvalue element="subject" language="en">
                 <xsl:call-template name="chopPunctuation">
                     <xsl:with-param name="chopString">
@@ -449,14 +450,14 @@
         
         <dcvalue element="type">
             <xsl:choose>
-                <xsl:when test="starts-with(marc:datafield[@tag=090][1]/marc:subfield[@code='a'],'TCC')">Trabalho de conclusão de curso</xsl:when>
-                <xsl:when test="starts-with(marc:datafield[@tag=090][1]/marc:subfield[@code='a'],'TA')">Trabalho acadêmico</xsl:when>
+                <xsl:when test="starts-with(datafield[@tag=090][1]/subfield[@code='a'],'TCC')">Trabalho de conclusão de curso</xsl:when>
+                <xsl:when test="starts-with(datafield[@tag=090][1]/subfield[@code='a'],'TA')">Trabalho acadêmico</xsl:when>
             </xsl:choose>
         </dcvalue>
             
         <!-- dc.description.sponsorship - MARC 536a -->
         
-        <xsl:for-each select="marc:datafield[@tag=536]/marc:subfield[@code='a']">
+        <xsl:for-each select="datafield[@tag=536]/subfield[@code='a']">
             <dcvalue element="description" qualifier="sponsorship">
                 <xsl:choose>
                     <xsl:when test="contains(.,'FAPESP')">Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP)</xsl:when>
@@ -475,32 +476,32 @@
         
         <!-- dc.description.sponsorshipId - MARC 536c -->
         
-        <xsl:for-each select="marc:datafield[@tag=536][marc:subfield[@code='c']]">
+        <xsl:for-each select="datafield[@tag=536][subfield[@code='c']]">
             <dcvalue element="description" qualifier="sponsorshipId">
                 <xsl:choose>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'FAPESP')">
-                        <xsl:value-of select="concat('FAPESP: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'FAPESP')">
+                        <xsl:value-of select="concat('FAPESP: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'CAPES')">
-                        <xsl:value-of select="concat('CAPES: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'CAPES')">
+                        <xsl:value-of select="concat('CAPES: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'CNPq')">
-                        <xsl:value-of select="concat('CNPq: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'CNPq')">
+                        <xsl:value-of select="concat('CNPq: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'FUNDUNESP')">
-                        <xsl:value-of select="concat('FUNDUNESP: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'FUNDUNESP')">
+                        <xsl:value-of select="concat('FUNDUNESP: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'Universidade Estadual Paulista')">
-                        <xsl:value-of select="concat('UNESP: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'Universidade Estadual Paulista')">
+                        <xsl:value-of select="concat('UNESP: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'FAPEMAT')">
-                        <xsl:value-of select="concat('FAPEMAT: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'FAPEMAT')">
+                        <xsl:value-of select="concat('FAPEMAT: ',subfield[@code='c'][1])" />
                     </xsl:when>
-                    <xsl:when test="contains(marc:subfield[@code='a'],'FAPERJ')">
-                        <xsl:value-of select="concat('FAPERJ: ',marc:subfield[@code='c'][1])" />
+                    <xsl:when test="contains(subfield[@code='a'],'FAPERJ')">
+                        <xsl:value-of select="concat('FAPERJ: ',subfield[@code='c'][1])" />
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="concat(marc:subfield[@code='a'],': ',marc:subfield[@code='c'][1])" />
+                        <xsl:value-of select="concat(subfield[@code='a'],': ',subfield[@code='c'][1])" />
                     </xsl:otherwise>
                 </xsl:choose>
             </dcvalue>
@@ -509,12 +510,12 @@
         <!-- dc.identifier.aleph - MARC 001 (SYS) -->
         
         <dcvalue element="identifier" qualifier="aleph">
-            <xsl:value-of select="marc:controlfield[@tag=001]" />
+            <xsl:value-of select="controlfield[@tag=001]" />
         </dcvalue>
         
         <!-- dc.identifier.file - MARC 856u (nome do arquivo PDF) -->
         
-        <xsl:for-each select="marc:datafield[@tag=856]/marc:subfield[@code='u']">
+        <xsl:for-each select="datafield[@tag=856]/subfield[@code='u']">
             <dcvalue element="identifier" qualifier="file">
                 <xsl:value-of select="." />
 				
@@ -532,28 +533,28 @@
     		
     		<!-- Autor -->
     		
-    		<xsl:value-of select="upper-case(substring-before(marc:datafield[@tag=100]/marc:subfield[@code='a'],','))"/>
+    		<xsl:value-of select="upper-case(substring-before(datafield[@tag=100]/subfield[@code='a'],','))"/>
     		<xsl:text>,</xsl:text>
     		<xsl:call-template name="chopPunctuation">
     			<xsl:with-param name="chopString">
-    				<xsl:value-of select="substring-after(marc:datafield[@tag=100]/marc:subfield[@code='a'],',')" />
+    				<xsl:value-of select="substring-after(datafield[@tag=100]/subfield[@code='a'],',')" />
     			</xsl:with-param>
     		</xsl:call-template>
     		
     		<!-- Título -->
     		
     		<xsl:text>. </xsl:text>
-    		<xsl:for-each select="marc:datafield[@tag=245]">
+    		<xsl:for-each select="datafield[@tag=245]">
     			<xsl:call-template name="chopPunctuation">
     				<xsl:with-param name="chopString">
-    					<xsl:value-of select="marc:subfield[@code='a']"/>
+    					<xsl:value-of select="subfield[@code='a']"/>
     				</xsl:with-param>
     			</xsl:call-template>
-    			<xsl:if test="marc:subfield[@code='b']">
+    			<xsl:if test="subfield[@code='b']">
     				<xsl:text>: </xsl:text>
     				<xsl:call-template name="chopPunctuation">
     					<xsl:with-param name="chopString">
-    						<xsl:value-of select="marc:subfield[@code='b']"/>
+    						<xsl:value-of select="subfield[@code='b']"/>
     					</xsl:with-param>
     				</xsl:call-template>
     			</xsl:if>
@@ -562,14 +563,14 @@
     		<!-- Ano do depósito -->
     		
     		<xsl:text>. </xsl:text>
-    		<xsl:value-of select="marc:datafield[@tag=260]/marc:subfield[@code='c']" />
+    		<xsl:value-of select="datafield[@tag=260]/subfield[@code='c']" />
     		
     		<!-- Número de folhas -->
     		
     		<xsl:text>. </xsl:text>
     		<xsl:call-template name="chopPunctuation">
     			<xsl:with-param name="chopString">
-    				<xsl:value-of select="marc:datafield[@tag=300]/marc:subfield[@code='a']" />
+    				<xsl:value-of select="datafield[@tag=300]/subfield[@code='a']" />
     			</xsl:with-param>
     		</xsl:call-template>
     		
@@ -577,46 +578,46 @@
     		
     		<xsl:text>. </xsl:text>
     		<xsl:choose>
-    			<xsl:when test="marc:datafield[@tag=502]">
-    				<xsl:value-of select="marc:datafield[@tag=502]/marc:subfield[@code='a']" />
+    			<xsl:when test="datafield[@tag=502]">
+    				<xsl:value-of select="datafield[@tag=502]/subfield[@code='a']" />
     			</xsl:when>
-    			<xsl:when test="starts-with(marc:datafield[@tag=500][1]/marc:subfield[@code='a'][1],'Trabalho')">
-    				<xsl:value-of select="marc:datafield[@tag=500][1]/marc:subfield[@code='a'][1]" />
+    			<xsl:when test="starts-with(datafield[@tag=500][1]/subfield[@code='a'][1],'Trabalho')">
+    				<xsl:value-of select="datafield[@tag=500][1]/subfield[@code='a'][1]" />
     			</xsl:when>
-    			<xsl:when test="starts-with(marc:datafield[@tag=500][2]/marc:subfield[@code='a'][1],'Trabalho')">
-    				<xsl:value-of select="marc:datafield[@tag=500][2]/marc:subfield[@code='a'][1]" />
+    			<xsl:when test="starts-with(datafield[@tag=500][2]/subfield[@code='a'][1],'Trabalho')">
+    				<xsl:value-of select="datafield[@tag=500][2]/subfield[@code='a'][1]" />
     			</xsl:when>
-    			<xsl:when test="starts-with(marc:datafield[@tag=500][3]/marc:subfield[@code='a'][1],'Trabalho')">
-    				<xsl:value-of select="marc:datafield[@tag=500][3]/marc:subfield[@code='a'][1]" />
+    			<xsl:when test="starts-with(datafield[@tag=500][3]/subfield[@code='a'][1],'Trabalho')">
+    				<xsl:value-of select="datafield[@tag=500][3]/subfield[@code='a'][1]" />
     			</xsl:when>
-    			<xsl:when test="starts-with(marc:datafield[@tag=500][4]/marc:subfield[@code='a'][1],'Trabalho')">
-    				<xsl:value-of select="marc:datafield[@tag=500][4]/marc:subfield[@code='a'][1]" />
+    			<xsl:when test="starts-with(datafield[@tag=500][4]/subfield[@code='a'][1],'Trabalho')">
+    				<xsl:value-of select="datafield[@tag=500][4]/subfield[@code='a'][1]" />
     			</xsl:when>
-    			<xsl:when test="starts-with(marc:datafield[@tag=500][5]/marc:subfield[@code='a'][1],'Trabalho')">
-    				<xsl:value-of select="marc:datafield[@tag=500][5]/marc:subfield[@code='a'][1]" />
+    			<xsl:when test="starts-with(datafield[@tag=500][5]/subfield[@code='a'][1],'Trabalho')">
+    				<xsl:value-of select="datafield[@tag=500][5]/subfield[@code='a'][1]" />
     			</xsl:when>
     		</xsl:choose>
     		
     		<!-- Ano da defesa -->
     		
     		<xsl:text>, </xsl:text>
-    		<xsl:value-of select="marc:datafield[@tag=260]/marc:subfield[@code='c']" />
+    		<xsl:value-of select="datafield[@tag=260]/subfield[@code='c']" />
     		<xsl:text>.</xsl:text>
     	</dcvalue>
     	
         <!-- dc.source -->
         
-        <dcvalue element="source">Aleph</dcvalue>
+        <dcvalue element="source">Alma</dcvalue>
         
         <!-- unesp.campus - MARC 944b -->
         
     	<xsl:variable name="undergraduateId">
     		<xsl:choose>
-    			<xsl:when test="ends-with(marc:datafield[@tag=944][1]/marc:subfield[@code='b'],'.')">
-    				<xsl:value-of select="substring-before(marc:datafield[@tag=944][1]/marc:subfield[@code='b'],'.')"/>
+    			<xsl:when test="ends-with(datafield[@tag=944][1]/subfield[@code='b'],'.')">
+    				<xsl:value-of select="substring-before(datafield[@tag=944][1]/subfield[@code='b'],'.')"/>
     			</xsl:when>
     			<xsl:otherwise>
-    				<xsl:value-of select="marc:datafield[@tag=944][1]/marc:subfield[@code='b']"/>
+    				<xsl:value-of select="datafield[@tag=944][1]/subfield[@code='b']"/>
     			</xsl:otherwise>
     		</xsl:choose>
     	</xsl:variable>
@@ -750,7 +751,7 @@
 				<xsl:when test="$undergraduateId = '1278854'">Universidade Estadual Paulista (Unesp), Câmpus Experimental de São João da Boa Vista</xsl:when>
         		
         		<xsl:otherwise>
-        			<xsl:value-of select="marc:datafield[@tag=710][1]/marc:subfield[@code='b']"/>
+        			<xsl:value-of select="datafield[@tag=710][1]/subfield[@code='b']"/>
         		</xsl:otherwise>
         		
         	</xsl:choose>
@@ -886,8 +887,8 @@
 				<xsl:when test="$undergraduateId = '1278854'">Engenharia de Telecomunicações - CESJBV</xsl:when>
         		
         		<xsl:otherwise>
-        			<xsl:value-of select="marc:datafield[@tag=944][1]/marc:subfield[@code='b']"/>
-        			<xsl:value-of select="marc:datafield[@tag=944][1]/marc:subfield[@code='a']"/>
+        			<xsl:value-of select="datafield[@tag=944][1]/subfield[@code='b']"/>
+        			<xsl:value-of select="datafield[@tag=944][1]/subfield[@code='a']"/>
         		</xsl:otherwise>
         		
         	</xsl:choose>
