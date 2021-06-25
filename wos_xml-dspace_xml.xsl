@@ -1124,9 +1124,12 @@
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Article'">Artigo</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Book'">Livro</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Bibliography'">Bibliografia</xsl:when>
+                <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Biography'">Biografia</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Book Chapter'">Capítulo de livro</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Correction'">Errata</xsl:when>
+                <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Retraction'">Errata</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Editorial Material'">Editorial</xsl:when>
+                <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Editorial material'">Editorial</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Letter'">Carta</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Note'">Nota</xsl:when>
                 <xsl:when test="static_data/fullrecord_metadata/normalized_doctypes/doctype[1] = 'Music Score'">Partitura</xsl:when>
