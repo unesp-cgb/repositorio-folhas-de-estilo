@@ -6,13 +6,15 @@
     
     <!-- Folha de estilo XSLT 2.0 utilizada para a conversão dos registros XML da SciELO em registros Dublin Core (XML padrão do DSpace) -->
 	
-    <!--  Última atualização: 2015-05-13
+    <!--  Última atualização: 2021-06-29
 		==================================
         Repositório Insitucional UNESP
         
         Elaborada pela Equipe do Repositório Institucional UNESP
         Contato: repositoriounesp@reitoria.unesp.br
-        ==================================  
+        ================================== 
+        
+        Em 2021-06-29 foi iniciada a atualização para o novo formato dos registros da Scielo, de 2021
      -->
     
     <xsl:output method="xml" indent="yes" version="1.0" encoding="UTF-8" omit-xml-declaration="no"/>
@@ -107,7 +109,7 @@
             </xsl:variable>
             
             <xsl:variable name="dc.relation.ispartof">
-                <xsl:value-of select="journal-meta/journal-title" />
+                <xsl:value-of select="journal-meta/journal-title-group/journal-title" />
             </xsl:variable>
             
             <!-- Metadados (campos) do registro Dublin Core -->
@@ -124,10 +126,10 @@
                        </xsl:with-param>
                    </xsl:call-template>
                     
-                    <xsl:variable name="rid" select="xref/@rid" />
-                    
+                    <xsl:variable name="rid" select="xref[@ref-type='aff']/@rid" />
+                                  
                     <xsl:variable name="aff">
-                        <xsl:value-of select="ancestor::node()[2]/aff[@id=$rid]/institution"/>
+                        <xsl:value-of select="../..//aff[@id=$rid]/institution[@content-type='orgname']"/>
                     </xsl:variable>
                     
                     <!-- Procura na afiliação do autor se há alguma menção à UNESP. Se há algum menção, é adiciona " [UNESP]" após o nome do autor -->
@@ -151,10 +153,28 @@
                     
                 </dcvalue>
             </xsl:for-each>
+
+            <!-- dc.author.orcid -->
             
+            <xsl:for-each select="article-meta/contrib-group/contrib">
+                <xsl:if test="contrib-id[@contrib-id-type='orcid']">
+                    <dcvalue element="author" qualifier="orcid">
+                        <xsl:value-of select="contrib-id"/>
+                        <xsl:text>[</xsl:text>
+                        <xsl:call-template name="CamelCase">
+                            <xsl:with-param name="text">
+                                <xsl:value-of select="name/given-names"/>
+                                <xsl:text> </xsl:text>
+                                <xsl:value-of select="name/surname"/>
+                            </xsl:with-param>
+                        </xsl:call-template>
+                        <xsl:text>]</xsl:text>
+                    </dcvalue>
+                </xsl:if>
+            </xsl:for-each>     
             <!-- dc.contributor.institution -->
             
-            <xsl:for-each select="article-meta/aff/institution">
+            <xsl:for-each select="article-meta//aff/institution[@content-type='orgname']">
                 <dcvalue element="contributor" qualifier="institution">
                     <xsl:choose>
                         
@@ -244,6 +264,26 @@
                     <xsl:attribute name="element">description</xsl:attribute>
                     <xsl:attribute name="qualifier">abstract</xsl:attribute>
                     <xsl:attribute name="language">
+                        <!-- Aqui voltamos até article -->
+                        <xsl:value-of select="../../../@xml:lang"/>
+                    </xsl:attribute>
+                    <xsl:call-template name="removeHtml">
+                        <xsl:with-param name="string">
+                            <xsl:value-of select="functx:trim(string-join(./p,' '))" />
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </xsl:element>
+            </xsl:for-each>
+
+
+            <!-- dc.description.abstract (translated)-->
+            
+            <xsl:for-each select="article-meta/trans-abstract">
+                <xsl:element name="dcvalue">
+                    <xsl:attribute name="element">description</xsl:attribute>
+                    <xsl:attribute name="qualifier">abstract</xsl:attribute>
+                    <xsl:attribute name="language">
+                        <!-- Aqui está dentro da própria tag -->
                         <xsl:value-of select="./@xml:lang"/>
                     </xsl:attribute>
                     <xsl:call-template name="removeHtml">
@@ -256,7 +296,7 @@
             
             <!-- dc.description.affiliation -->
             
-            <xsl:for-each select="article-meta/aff/institution">
+            <xsl:for-each select="article-meta//aff/institution[@content-type='orgname']">
                 <dcvalue element="description" qualifier="affiliation">
                     <xsl:choose>
                         <xsl:when test="starts-with(.,',')">
@@ -266,12 +306,19 @@
                             <xsl:value-of select="." />
                         </xsl:otherwise>
                     </xsl:choose>
+                    
+                    <!-- Coloca a subdivisão, se houver -->
+                    <xsl:if test="../institution[@content-type='orgdiv1'] != ''">
+                        <xsl:text>, </xsl:text>
+                        <xsl:value-of select="../institution[@content-type='orgdiv1']" />
+                    </xsl:if>
+                    
                 </dcvalue>
             </xsl:for-each>
             
             <!-- dc.description.affiliationUnesp -->
             
-            <xsl:for-each select="article-meta/aff/institution">
+            <xsl:for-each select="article-meta//aff/institution[@content-type='orgname']">
                 <xsl:if test="
                     functx:contains-any-of(lower-case(.),
                     ('unesp',
@@ -294,6 +341,13 @@
                                 <xsl:value-of select="." />
                             </xsl:otherwise>
                         </xsl:choose>
+                        
+                        <!-- Coloca a subdivisão, se houver -->
+                        <xsl:if test="../institution[@content-type='orgdiv1'] != ''">
+                            <xsl:text>, </xsl:text>
+                            <xsl:value-of select="../institution[@content-type='orgdiv1']" />
+                        </xsl:if>
+                        
                     </dcvalue>
                 </xsl:if>
             </xsl:for-each>
@@ -302,166 +356,167 @@
             
             <dcvalue element="description" qualifier="extent">
                 <xsl:value-of select="$dc.description.extent" />    
-            </dcvalue>
+            </dcvalue>         
             
-            <xsl:variable name="article-body">
-               <xsl:value-of select="lower-case(string-join(../body,' '))" />
-            </xsl:variable>
+            <!-- Agência de fomento em funding-group/award-group/funding-source -->
+            <xsl:for-each select="article-meta/funding-group/award-group/funding-source"> 
+               <dcvalue element="description" qualifier="sponsorship">
+               <xsl:choose>
+                   <xsl:when test="
+                   functx:contains-any-of(lower-case(.),(
+                   'fapesp',
+                   'fundação de amparo à pesquisa do estado de são paulo',
+                   'fundacao de amparo a pesquisa do estado de sao paulo',
+                   'fundación de apoyo a la investigación del estado de são paulo',
+                   'state of são paulo research foundation',
+                   'foundation for research support of the state of são paulo',
+                   'foundation for research support of the state of sao paulo',                   
+                   'sao paulo research foundation',
+                   'são paulo state research foundation',                   
+                   'sao paulo state research foundation'))">
+                   <xsl:text>Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP)</xsl:text>
+               </xsl:when>
             
-            <!-- Tenta buscar a agência de fomento nas seções "Agradecimentos" e "Acknowledgements" -->
+               <xsl:when test="
+                   functx:contains-any-of(lower-case(.),(
+                   'cnpq',
+                   'cons. nac. desenvolv. cient. tecnol.',
+                   'national council for scientific and technological development',                   
+                   'conselho nacional de desenvolvimento cientifico e tecnologico',
+                   'conselho nacional de desenvolvimento científico e tecnológico'))">
+                   <xsl:text>Conselho Nacional de Desenvolvimento Científico e Tecnológico (CNPq)</xsl:text>
+               </xsl:when>
             
-            <xsl:variable name="acknowledgments">
-                <xsl:if test="functx:contains-any-of($article-body,('agradecim','acknowledgement','acknowledgment'))">
+               <xsl:when test="
+                   functx:contains-any-of(lower-case(.),(
+                   'capes',
+                   'coordination of improvement of higher education personnel',
+                   'coordination for the improvement of higher education personnel',                   
+                   'coordenacao de aperfeicoamento de pessoal de nivel superior',
+                   'coordenação de aperfeiçoamento de pessoal de nível superior'))">
+                   <xsl:text>Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES)</xsl:text>
+               </xsl:when>
+            
+               <xsl:when test="
+                   functx:contains-any-of(lower-case(.),(
+                   'fundunesp',
+                   'fundacao para o desenvolvimento da unesp',
+                   'fundação para o desenvolvimento da unesp'))">
+                   <xsl:text>Fundação para o Desenvolvimento da UNESP (FUNDUNESP)</xsl:text>
+               </xsl:when>
+        	
+        	   <xsl:when test="
+        	       functx:contains-any-of(lower-case(.),(
+        	       'fundação araucária',
+        	       'fundacao araucaria',
+        	       'fundação araucaria'))">
+        		   <xsl:text>Fundação Araucária de Apoio ao Desenvolvimento Científico e Tecnológico do Paraná (FAADCT/PR)</xsl:text>
+        	   </xsl:when>
+        	
+        	   <xsl:when test="
+        	       functx:contains-any-of(lower-case(.),(
+        	       'fapemig',
+        	       'fundacao de amparo a pesquisa do estado de minas gerais',
+        	       'fundação de amparo à pesquisa do estado de minas gerais'))">
+                   <xsl:text>Fundação de Amparo à Pesquisa do Estado de Minas Gerais (FAPEMIG)</xsl:text>
+               </xsl:when>
+            
+               <xsl:when test="
+                   functx:contains-any-of(lower-case(.),(
+                   'faperj',
+                   'fundacao de amparo a pesquisa do estado do rio de janeiro',
+                   'fundação de amparo à pesquisa do estado do rio de janeiro',
+                   'carlos chagas filho'))">
+                   <xsl:text>Fundação de Amparo à Pesquisa do Estado do Rio de Janeiro (FAPERJ)</xsl:text>
+        	   </xsl:when>
+
+               <xsl:otherwise>
+                   <xsl:value-of select="normalize-space(.)" />
+               </xsl:otherwise>
+                   
+               </xsl:choose>
+               </dcvalue>  
+           </xsl:for-each>
+           
+            <!-- dc.description.sponsorshipId -->
+            
+            <xsl:for-each select="article-meta/funding-group/award-group">
+                    <xsl:if test="./award-id">
+                    <dcvalue element="description" qualifier="sponsorshipId">        
                     <xsl:choose>
-                        <xsl:when test="contains(substring-after($article-body,'agradecim'),'refer')">
-                            <xsl:choose>
-                                <xsl:when test="functx:contains-any-of(substring-before(substring-after($article-body,'agradecimento'),'refer'),('resum','abstract'))">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'agradecimento'),'resum')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'agradecimento'),'abstract')" />
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'agradecimento'),'refer')" />
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:when>
-                        <xsl:when test="contains(substring-after($article-body,'agradecim'),'resum')">
-                            <xsl:choose>
-                                <xsl:when test="contains(substring-before(substring-after($article-body,'agradecimento'),'resum'),'refer')">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'agradecimento'),'refer')" />
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'agradecimento'),'resum')" />
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:when>                                             
-                        <xsl:when test="contains(substring-after($article-body,'acknowledgement'),'refer') or contains(substring-after($article-body,'acknowledgment'),'refer')">
-                            <xsl:choose>
-                                <xsl:when test="functx:contains-any-of(substring-before(substring-after($article-body,'acknowledgement'),'refer'),('resum','abstract'))">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'resum')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'abstract')" />
-                                </xsl:when>
-                                <xsl:when test="functx:contains-any-of(substring-before(substring-after($article-body,'acknowledgment'),'refer'),('resum','abstract'))">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'resum')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'abstract')" />
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'refer')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'refer')" />
-                                </xsl:otherwise>
-                            </xsl:choose>
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'fapesp',
+                            'fundação de amparo à pesquisa do estado de são paulo',
+                            'fundacao de amparo a pesquisa do estado de sao paulo',
+                            'fundación de apoyo a la investigación del estado de são paulo',
+                            'state of são paulo research foundation',
+                            'foundation for research support of the state of são paulo',
+                            'foundation for research support of the state of sao paulo',
+                            'sao paulo research foundation',
+                            'são paulo state research foundation',
+                            'sao paulo state research foundation'))">
+                            <xsl:text>FAPESP: </xsl:text>
                         </xsl:when>
                         
-                        <xsl:when test="contains(substring-after($article-body,'acknowledgement'),'abstract') or contains(substring-after($article-body,'acknowledgment'),'abstract')">
-                            <xsl:choose>
-                                <xsl:when test="contains(substring-before(substring-after($article-body,'acknowledgment'),'abstract'),'refer')">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'refer')" />
-                                </xsl:when>
-                                <xsl:when test="contains(substring-before(substring-after($article-body,'acknowledgement'),'abstract'),'refer')">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'refer')" />
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'abstract')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'abstract')" />
-                                </xsl:otherwise>
-                            </xsl:choose>
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'cnpq',
+                            'national council for scientific and technological development',
+                            'conselho nacional de desenvolvimento cientifico e tecnologico',
+                            'cons. nac. desenvolv. cient. tecnol.',
+                            'conselho nacional de desenvolvimento científico e tecnológico'))">
+                            <xsl:text>CNPq: </xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains(substring-after($article-body,'acknowledgment'),'resum') or contains(substring-after($article-body,'acknowledgement'),'resum')">
-                            <xsl:choose>
-                                <xsl:when test="contains(substring-before(substring-after($article-body,'acknowledgment'),'resum'),'refer')">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'refer')" />
-                                </xsl:when>
-                                <xsl:when test="contains(substring-before(substring-after($article-body,'acknowledgement'),'resum'),'refer')">
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'refer')" />
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgment'),'resum')" />
-                                    <xsl:value-of select="substring-before(substring-after($article-body,'acknowledgement'),'resum')" />
-                                </xsl:otherwise>
-                            </xsl:choose>
+                        
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'capes',
+                            'coordination of improvement of higher education personnel',
+                            'coordination for the improvement of higher education personnel',
+                            'coordenacao de aperfeicoamento de pessoal de nivel superior',
+                            'coordenação de aperfeiçoamento de pessoal de nível superior'))">
+                            <xsl:text>CAPES: </xsl:text>
                         </xsl:when>
+                        
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'fundunesp',
+                            'fundacao para o desenvolvimento da unesp',
+                            'fundação para o desenvolvimento da unesp'))">
+                            <xsl:text>FUNDUNESP: </xsl:text>
+                        </xsl:when>
+                        
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'faperj',
+                            'fundacao de amparo a pesquisa do estado do rio de janeiro',
+                            'fundação de amparo à pesquisa do estado do rio de janeiro',
+                            'carlos chagas filho'))">
+                            <xsl:text>FAPERJ: </xsl:text>
+                        </xsl:when>
+                        
+                        <xsl:when test="
+                            functx:contains-any-of(lower-case(./funding-source),(
+                            'fapemig',
+                            'fundacao de amparo a pesquisa do estado de minas gerais',
+                            'fundação de amparo à pesquisa do estado de minas gerais'))">
+                            <xsl:text>FAPEMIG: </xsl:text>
+                        </xsl:when>
+                        
+                        <xsl:otherwise>
+                            <xsl:value-of select="./funding-source" />
+                            <xsl:text>: </xsl:text>
+                        </xsl:otherwise>
                     </xsl:choose>
-                </xsl:if>
-            </xsl:variable>
+                        
+                        <xsl:value-of select="string-join(.//award-id,'; ')" />
+                        
+                    </dcvalue>
+                    </xsl:if>
+                    
+            </xsl:for-each>
             
-            <xsl:if test="
-                functx:contains-any-of($acknowledgments,(
-                'fapesp',
-                'fundação de amparo à pesquisa do estado de são paulo',
-                'fundacao de amparo a pesquisa do estado de sao paulo',
-                'fundación de apoyo a la investigación del estado de são paulo',
-                'state of são paulo research foundation',
-                'sao paulo research foundation',
-                'sao paulo state research foundation'))">
-                <dcvalue element="description" qualifier="sponsorship">
-                    <xsl:text>Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP)</xsl:text>
-                </dcvalue>
-            </xsl:if>
-            
-            <xsl:if test="
-                functx:contains-any-of($acknowledgments,(
-                'cnpq',
-                'conselho nacional de desenvolvimento cientifico e tecnologico',
-                'conselho nacional de desenvolvimento científico e tecnológico'))">
-                <dcvalue element="description" qualifier="sponsorship">
-                    <xsl:text>Conselho Nacional de Desenvolvimento Científico e Tecnológico (CNPq)</xsl:text>
-                </dcvalue>
-            </xsl:if>
-            
-            <xsl:if test="
-                functx:contains-any-of($acknowledgments,(
-                'capes',
-                'coordenacao de aperfeicoamento de pessoal de nivel superior',
-                'coordenação de aperfeiçoamento de pessoal de nível superior'))">
-                <dcvalue element="description" qualifier="sponsorship">
-                    <xsl:text>Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES)</xsl:text>
-                </dcvalue>
-            </xsl:if>
-            
-            <xsl:if test="
-                functx:contains-any-of($acknowledgments,(
-                'fundunesp',
-                'fundacao para o desenvolvimento da unesp',
-                'fundação para o desenvolvimento da unesp'))">
-                <dcvalue element="description" qualifier="sponsorship">
-                    <xsl:text>Fundação para o Desenvolvimento da UNESP (FUNDUNESP)</xsl:text>
-                </dcvalue>
-            </xsl:if>
-        	
-        	<xsl:if test="
-        	    functx:contains-any-of($acknowledgments,(
-        		'fundação araucária',
-        		'fundação araucaria'))">
-        		<dcvalue element="description" qualifier="sponsorship">
-        			<xsl:text>Fundação Araucária de Apoio ao Desenvolvimento Científico e Tecnológico do Paraná (FAADCT/PR)</xsl:text>
-        		</dcvalue>
-        	</xsl:if>
-        	
-        	<xsl:if test="
-        	    functx:contains-any-of($acknowledgments,(
-        		'fapemig',
-        		'fundação de amparo à pesquisa do estado de minas gerais'))">
-        		<dcvalue element="description" qualifier="sponsorship">
-        			<xsl:text>Fundação de Amparo à Pesquisa do Estado de Minas Gerais (FAPEMIG)</xsl:text>
-        		</dcvalue>
-        	</xsl:if>
-            
-        	<xsl:if test="
-        	    functx:contains-any-of($acknowledgments,(
-        		'faperj',
-        		'fundação de amparo à pesquisa do estado do rio de janeiro'))">
-        		<dcvalue element="description" qualifier="sponsorship">
-        			<xsl:text>Fundação de Amparo à Pesquisa do Estado do Rio de Janeiro (FAPERJ)</xsl:text>
-        		</dcvalue>
-        	</xsl:if>
-        	
-        	<xsl:if test="
-        	    functx:contains-any-of($acknowledgments,(
-        		'faperj',
-        		'fundação de amparo à pesquisa do estado do rio de janeiro'))">
-        		<dcvalue element="description" qualifier="sponsorship">
-        			<xsl:text>Fundação de Amparo à Pesquisa do Estado do Rio de Janeiro (FAPERJ)</xsl:text>
-        		</dcvalue>
-        	</xsl:if>
         	
             <!-- dc.identifier -->
             
@@ -472,8 +527,8 @@
                         <xsl:value-of select="article-meta/article-id[@pub-id-type='doi'][1]" />
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:text>http://www.scielo.br/scielo.php?script=sci_arttext&amp;pid=</xsl:text>
-                        <xsl:value-of select="article-meta/article-id[1]" />
+                        <xsl:text>https://scielo.br/article/</xsl:text>
+                        <xsl:value-of select="article-meta/article-id[@specific-use='scielo-v2'][1]" />
                     </xsl:otherwise>
                 </xsl:choose>
             </dcvalue>
@@ -539,32 +594,32 @@
             </xsl:for-each>
             
             <!-- dc.identifier.scielo -->
-            
+          
             <dcvalue element="identifier" qualifier="scielo">
-                <xsl:value-of select="article-meta/article-id[1]" />
+                <xsl:value-of select="article-meta/article-id[@specific-use='scielo-v2'][1]" />
             </dcvalue>
             
         	<!-- dc.identifier.file -->
         	
         	<dcvalue element="identifier" qualifier="file">
-        		<xsl:value-of select="concat(article-meta/article-id[1],'.pdf')" />
+        	    <xsl:value-of select="concat(article-meta/article-id[@specific-use='scielo-v2'][1],'.pdf')" />
         	</dcvalue>
         	
             <!-- dc.language.iso -->
             
             <dcvalue element="language" qualifier="iso">
                 <xsl:choose>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='de'">deu</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='en'">eng</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='fr'">fra</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='it'">ita</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='la'">lat</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='pl'">pol</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='pt'">por</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='es'">spa</xsl:when>
-                    <xsl:when test="article-meta/title-group[1]/article-title[1]/@xml:lang='zh'">zho</xsl:when>
+                    <xsl:when test="../@xml:lang='de'">deu</xsl:when>
+                    <xsl:when test="../@xml:lang='en'">eng</xsl:when>
+                    <xsl:when test="../@xml:lang='fr'">fra</xsl:when>
+                    <xsl:when test="../@xml:lang='it'">ita</xsl:when>
+                    <xsl:when test="../@xml:lang='la'">lat</xsl:when>
+                    <xsl:when test="../@xml:lang='pl'">pol</xsl:when>
+                    <xsl:when test="../@xml:lang='pt'">por</xsl:when>
+                    <xsl:when test="../@xml:lang='es'">spa</xsl:when>
+                    <xsl:when test="../@xml:lang='zh'">zho</xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="article-meta/title-group[1]/article-title[1]/@xml:lang" />
+                        <xsl:value-of select="../@xml:lang" />
                     </xsl:otherwise>
                 </xsl:choose>
             </dcvalue>
@@ -599,7 +654,7 @@
                 <xsl:element name="dcvalue">
                     <xsl:attribute name="element">subject</xsl:attribute>
                     <xsl:attribute name="language">
-                        <xsl:value-of select="./@lng"/>
+                        <xsl:value-of select="../@xml:lang"/>
                     </xsl:attribute>
                     <xsl:call-template name="removeHtml">
                         <xsl:with-param name="string">
@@ -614,7 +669,7 @@
             <xsl:element name="dcvalue">
                 <xsl:attribute name="element">title</xsl:attribute>
                 <xsl:attribute name="language">
-                    <xsl:value-of select="article-meta/title-group/article-title[1]/@xml:lang" />
+                    <xsl:value-of select="../@xml:lang" />
                 </xsl:attribute>
                 <xsl:call-template name="removeHtml">
                     <xsl:with-param name="string">
@@ -629,15 +684,15 @@
             
             <!-- dc.title.alternative -->
             
-            <xsl:for-each select="article-meta/title-group/article-title[position()&gt;1]">
+            <xsl:for-each select="article-meta/title-group/trans-title-group/trans-title">
                 <xsl:element name="dcvalue">
                     <xsl:attribute name="element">title</xsl:attribute>
                     <xsl:attribute name="qualifier">alternative</xsl:attribute>
                     <xsl:attribute name="language">
-                        <xsl:value-of select="./@xml:lang" />
+                        <xsl:value-of select="../@xml:lang" />
                     </xsl:attribute>
                     <xsl:variable name="language">
-                        <xsl:value-of select="./@xml:lang" />
+                        <xsl:value-of select="../@xml:lang" />
                     </xsl:variable>
                     <xsl:call-template name="removeHtml">
                         <xsl:with-param name="string">
@@ -653,7 +708,7 @@
             
             <!-- dc.type -->
         
-            <dcvalue element="type" language="en">
+            <dcvalue element="type">
                 <xsl:text>Artigo</xsl:text>
             </dcvalue>
             
