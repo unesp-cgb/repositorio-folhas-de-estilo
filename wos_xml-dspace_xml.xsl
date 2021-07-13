@@ -1167,7 +1167,8 @@
     
     <xsl:template name="CamelCaseWord">
         <xsl:param name="text"/>
-        <xsl:value-of select="translate(substring($text,1,1),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ')" /><xsl:value-of select="translate(substring($text,2,string-length($text)-1),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')" />
+        <xsl:value-of select="translate(substring($text,1,1),'abcdefghijklmnopqrstuvwxyzáàâäãéèêëíìîïóòôöõúùûüçñ','ABCDEFGHIJKLMNOPQRSTUVWXYZÁÀÂÄÃÉÈÊËÍÌÎÏÓÒÔÖÕÚÙÛÜÇÑ')" />
+        <xsl:value-of select="translate(substring($text,2,string-length($text)-1),'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÀÂÄÃÉÈÊËÍÌÎÏÓÒÔÖÕÚÙÛÜÇÑ','abcdefghijklmnopqrstuvwxyzáàâäãéèêëíìîïóòôöõúùûüçñ')" />
     </xsl:template>
     
     <!-- Fim da folha de estilo =) -->
