@@ -145,7 +145,7 @@
                         'state univ sao paulo',
                         'state univ são paulo',
                         'univ estad paulista',
-                        'estadual paulista‏',
+                        'estadual paulista',
                         'universidade estadual de são paulo',
                         'mesquita filho'))">
                         <xsl:text> [UNESP]</xsl:text>
@@ -191,7 +191,7 @@
                             'state univ sao paulo',
                             'state univ são paulo',
                             'univ estad paulista',
-                            'estadual paulista‏',
+                            'estadual paulista',
                             'mesquita filho'))">
                             <xsl:text>Universidade Estadual Paulista (UNESP)</xsl:text>
                         </xsl:when>
@@ -330,7 +330,7 @@
                     'state univ sao paulo',
                     'state univ são paulo',
                     'univ estad paulista',
-                    'estadual paulista‏',
+                    'estadual paulista',
                     'mesquita filho'))">
                     <dcvalue element="description" qualifier="affiliationUnesp">
                         <xsl:choose>
