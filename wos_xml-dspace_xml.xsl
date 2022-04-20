@@ -298,7 +298,7 @@
                     'so paulo state university',
                     'univ estad paulista',
                     'univ. estadual paulista',
-                    'estadual paulista‏',
+                    'estadual paulista',
                     'ibilce',
                     'mesquita filho'))">
                     <xsl:text> [UNESP]</xsl:text>
@@ -353,7 +353,7 @@
                         'so paulo state university',
                         'univ estad paulista',
                         'univ. estadual paulista',
-                        'estadual paulista‏',
+                        'estadual paulista',
                         'ibilce',
                         'mesquita filho'))">
                         <xsl:text>Universidade Estadual Paulista (UNESP)</xsl:text>
@@ -669,7 +669,7 @@
             'so paulo state university',
             'univ estad paulista',
             'univ. estadual paulista',
-            'estadual paulista‏',
+            'estadual paulista',
             'ibilce',
             'mesquita filho')))">
             <dcvalue element="contributor" qualifier="institution">
@@ -735,7 +735,7 @@
                 'so paulo state university',
                 'univ estad paulista',
                 'univ. estadual paulista',
-                'estadual paulista‏',
+                'estadual paulista',
                 'ibilce',
                 'mesquita filho'))"> 
                 <dcvalue element="description" qualifier="affiliationUnesp">  
@@ -766,7 +766,7 @@
             'so paulo state university',
             'univ estad paulista',
             'univ. estadual paulista',
-            'estadual paulista‏',
+            'estadual paulista',
             'ibilce',
             'mesquita filho'))
             ">
